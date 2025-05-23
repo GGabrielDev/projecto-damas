@@ -1,6 +1,9 @@
 #include <iostream>
 
 int main() {
-    std::cout << "Proyecto Damas 2025 iniciado correctamente.\n";
-    return 0;
+  Board b;
+  b.initialize();
+
+  std::cout << "Proyecto Damas 2025 iniciado correctamente.\n";
+  return 0;
 }
