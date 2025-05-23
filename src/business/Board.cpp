@@ -4,26 +4,19 @@
 #include "King.h"
 
 Board::Board() {
-    for (auto& row : squares_) {
-        row.fill(nullptr);
-    }
+    for (auto& row : squares_) row.fill(nullptr);
 }
 
 void Board::initialize() {
-    for (int row = 0; row < 3; ++row) {
-        for (int col = 0; col < 8; ++col) {
-            if ((row + col) % 2 == 1) {
+    for (int row = 0; row < 3; ++row)
+        for (int col = 0; col < 8; ++col)
+            if ((row + col) % 2 == 1)
                 squares_[row][col] = new Man(Color::Black);
-            }
-        }
-    }
-    for (int row = 5; row < 8; ++row) {
-        for (int col = 0; col < 8; ++col) {
-            if ((row + col) % 2 == 1) {
+
+    for (int row = 5; row < 8; ++row)
+        for (int col = 0; col < 8; ++col)
+            if ((row + col) % 2 == 1)
                 squares_[row][col] = new Man(Color::White);
-            }
-        }
-    }
 }
 
 bool Board::isEmpty(const Position& pos) const {

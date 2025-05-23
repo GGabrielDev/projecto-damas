@@ -7,10 +7,11 @@ include_directories(include)
 # Librería core del negocio
 add_library(core
     src/business/Board.cpp
-    src/business/Piece.cpp
-    src/business/Man.cpp
     src/business/King.cpp
+    src/business/Man.cpp
     src/business/Move.cpp
+    src/business/Piece.cpp
+    src/business/RuleEngine.cpp
 )
 target_include_directories(core PUBLIC include)
 
