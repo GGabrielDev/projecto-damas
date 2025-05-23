@@ -1,3 +1,4 @@
+#include <cmath>
 #include "Board.h"
 #include "Piece.h"
 #include "Man.h"
@@ -54,12 +55,19 @@ void Board::movePiece(const Position& from, const Position& to) {
     squares_[to.row][to.col] = p;
     squares_[from.row][from.col] = nullptr;
 
-    if (p->type() == PieceType::Man) {
-        Color c = p->color();
-        if ((c == Color::Black && to.row == 7) || (c == Color::White && to.row == 0)) {
-            delete p;
-            squares_[to.row][to.col] = new King(c);
-        }
+    // Eliminar piezas capturadas (si el movimiento es un salto)
+    if (std::abs(to.row - from.row) == 2) {
+        int middleRow = (from.row + to.row) / 2;
+        int middleCol = (from.col + to.col) / 2;
+        removePiece(Position{middleRow, middleCol});
+    }
+
+    // Promoción a dama
+    if (p->type() == PieceType::Man && 
+        ((p->color() == Color::Black && to.row == 7) || 
+         (p->color() == Color::White && to.row == 0))) {
+        delete p;
+        squares_[to.row][to.col] = new King(p->color());
     }
 }
 

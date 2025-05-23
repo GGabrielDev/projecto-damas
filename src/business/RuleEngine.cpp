@@ -4,12 +4,6 @@
 #include "King.h"
 #include <vector>
 
-namespace {
-    bool isValidPosition(const Position& pos) {
-        return pos.row >= 0 && pos.row < 8 && pos.col >= 0 && pos.col < 8;
-    }
-}
-
 std::vector<Move> RuleEngine::generateAllSimple(const Board& board, Color playerColor) const {
     std::vector<Move> moves;
     for (int r = 0; r < 8; ++r) {
@@ -66,13 +60,23 @@ std::vector<Move> RuleEngine::generatePieceCaptures(const Board& board, const Po
 
 bool RuleEngine::isValidMove(const Board& board, const Move& move) const {
     Piece* p = board.getPiece(move.from());
-    if (!p || board.getPiece(move.to()) != nullptr)
-        return false;
+    if (!p || !board.isEmpty(move.to())) return false;
 
-    auto possibleMoves = p->validMoves(board, move.from());
-    for (const auto& m : possibleMoves) {
-        if (m.to() == move.to() && m.isCapture() == move.isCapture())
+    // Verificar capturas primero (prioridad)
+    auto captures = generateAllCaptures(board, p->color());
+    for (const auto& m : captures) {
+        if (m.to() == move.to() && m.from() == move.from()) {
             return true;
+        }
     }
+
+    // Si no hay capturas posibles, verificar movimientos simples
+    auto simpleMoves = generateAllSimple(board, p->color());
+    for (const auto& m : simpleMoves) {
+        if (m.to() == move.to()) {
+            return true;
+        }
+    }
+
     return false;
 }
