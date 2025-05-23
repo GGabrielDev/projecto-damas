@@ -1,4 +1,4 @@
-## 1.1. Requisitos Funcionales
+## Requisitos Funcionales
 
 1. **Tablero**
 
@@ -45,7 +45,7 @@
 
 ---
 
-## 1.2. Requisitos No-Funcionales
+## Requisitos No-Funcionales
 
 - **Lenguaje y estándar**: C++17.
 - **Arqui­tectura**: Modelo de 3 capas
