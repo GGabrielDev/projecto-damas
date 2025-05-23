@@ -11,15 +11,15 @@ int main() {
     RuleEngine rules;
     auto blackMoves = rules.generateAllSimple(b, Color::Black);
     std::cout << "Black moves count: " << blackMoves.size() << std::endl;
-    assert(blackMoves.size() == 7);  // corregido de 8 a 7
+    assert(blackMoves.size() == 7);
 
     auto whiteMoves = rules.generateAllSimple(b, Color::White);
     std::cout << "White moves count: " << whiteMoves.size() << std::endl;
-    assert(whiteMoves.size() == 7);  // corregido de 8 a 7
+    assert(whiteMoves.size() == 7);
 
-    std::cout << "[OK] Simple moves test passed ("
+    std::cout << "[OK] Simple moves test passed (" 
               << blackMoves.size() << " black, "
-              << whiteMoves.size() << " white)."
+              << whiteMoves.size() << " white)." 
               << std::endl;
     return 0;
 }

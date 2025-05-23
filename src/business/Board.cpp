@@ -3,11 +3,28 @@
 #include "Man.h"
 #include "King.h"
 
-Board::Board() {
-    for (auto& row : squares_) row.fill(nullptr);
+Board::Board()
+    : squares_{} // value-initialize to nullptr
+{
+}
+
+Board::~Board() {
+    clear();
+}
+
+void Board::clear() {
+    for (auto& row : squares_) {
+        for (auto& cell : row) {
+            if (cell) {
+                delete cell;
+                cell = nullptr;
+            }
+        }
+    }
 }
 
 void Board::initialize() {
+    clear();
     for (int row = 0; row < 3; ++row)
         for (int col = 0; col < 8; ++col)
             if ((row + col) % 2 == 1)
@@ -17,6 +34,11 @@ void Board::initialize() {
         for (int col = 0; col < 8; ++col)
             if ((row + col) % 2 == 1)
                 squares_[row][col] = new Man(Color::White);
+}
+
+void Board::placePiece(const Position& pos, Piece* piece) {
+    delete squares_[pos.row][pos.col];
+    squares_[pos.row][pos.col] = piece;
 }
 
 bool Board::isEmpty(const Position& pos) const {
@@ -31,6 +53,7 @@ void Board::movePiece(const Position& from, const Position& to) {
     Piece* p = squares_[from.row][from.col];
     squares_[to.row][to.col] = p;
     squares_[from.row][from.col] = nullptr;
+
     if (p->type() == PieceType::Man) {
         Color c = p->color();
         if ((c == Color::Black && to.row == 7) || (c == Color::White && to.row == 0)) {

@@ -4,11 +4,15 @@
 #include <array>
 #include "Piece.h"
 #include "Move.h"
+#include "Position.h"
 
 class Board {
 public:
     Board();
+    ~Board();
+    void clear();
     void initialize();
+    void placePiece(const Position& pos, Piece* piece);
     bool isEmpty(const Position& pos) const;
     Piece* getPiece(const Position& pos) const;
     void movePiece(const Position& from, const Position& to);

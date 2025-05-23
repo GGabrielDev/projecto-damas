@@ -9,16 +9,14 @@ int main() {
     int countBlack = 0, countWhite = 0;
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
-            if ((i + j) % 2 == 1) {
-                if (!b.isEmpty({i, j})) {
-                    if (b.getPiece({i, j})->color() == Color::Black) ++countBlack;
-                    else ++countWhite;
-                }
+            if ((i + j) % 2 == 1 && !b.isEmpty({i,j})) {
+                if (b.getPiece({i,j})->color() == Color::Black) ++countBlack;
+                else ++countWhite;
             }
         }
     }
     assert(countBlack == 12);
     assert(countWhite == 12);
-    std::cout << "[OK] Test de inicializacion de Board completado.\n";
+    std::cout << "[OK] Board initialization test passed.\n";
     return 0;
 }
