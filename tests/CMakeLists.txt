@@ -37,3 +37,11 @@ add_executable(TestCaptures test_captures.cpp)
 target_include_directories(TestCaptures PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(TestCaptures PRIVATE core)
 add_test(NAME Captures COMMAND TestCaptures)
+
+add_executable(TestConsoleUI test_consoleui.cpp ../src/presentation/ConsoleUI.cpp)
+target_include_directories(TestConsoleUI PRIVATE 
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src/presentation  # Agregar esta línea
+)
+target_link_libraries(TestConsoleUI PRIVATE core)
+add_test(NAME ConsoleUI COMMAND TestConsoleUI)
