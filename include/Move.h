@@ -6,11 +6,13 @@
 
 class Move {
 public:
-    Move(const Position& from, const Position& to, bool capture=false);
-    const Position& from() const;
-    const Position& to() const;
+    Move(Position from, Position to, bool isCapture);
+
+    Position from() const;
+    Position to() const;
     bool isCapture() const;
     const std::vector<Position>& path() const;
+    void addToPath(const Position& pos);
 
 private:
     Position from_;

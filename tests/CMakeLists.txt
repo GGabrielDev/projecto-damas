@@ -1,5 +1,3 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/tests)
-
 add_executable(TestBoard test_board.cpp)
 target_include_directories(TestBoard PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(TestBoard PRIVATE core)
@@ -40,10 +38,7 @@ target_include_directories(TestCaptures PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(TestCaptures PRIVATE core)
 add_test(NAME Captures COMMAND TestCaptures)
 
-add_executable(TestConsoleUI test_consoleui.cpp ../src/presentation/ConsoleUI.cpp)
-target_include_directories(TestConsoleUI PRIVATE 
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/src/presentation  # Agregar esta línea
-)
-target_link_libraries(TestConsoleUI PRIVATE core)
-add_test(NAME ConsoleUI COMMAND TestConsoleUI)
+add_executable(TestMultiCapture test_multi_capture.cpp)
+target_include_directories(TestMultiCapture PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(TestMultiCapture PRIVATE core)
+add_test(NAME MultiCapture COMMAND TestMultiCapture)

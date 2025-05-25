@@ -1,16 +1,50 @@
 #include <cmath>
 #include "Board.h"
-#include "Piece.h"
 #include "Man.h"
 #include "King.h"
 
 Board::Board()
-    : squares_{} // value-initialize to nullptr
-{
-}
+    : squares_{} {}
 
 Board::~Board() {
     clear();
+}
+
+Board::Board(const Board& other)
+    : squares_{} {
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            if (other.squares_[r][c]) {
+                Piece* p = other.squares_[r][c];
+                if (p->type() == PieceType::Man)
+                    squares_[r][c] = new Man(p->color());
+                else
+                    squares_[r][c] = new King(p->color());
+            } else {
+                squares_[r][c] = nullptr;
+            }
+        }
+    }
+}
+
+Board& Board::operator=(const Board& other) {
+    if (this != &other) {
+        clear();
+        for (int r = 0; r < 8; ++r) {
+            for (int c = 0; c < 8; ++c) {
+                if (other.squares_[r][c]) {
+                    Piece* p = other.squares_[r][c];
+                    if (p->type() == PieceType::Man)
+                        squares_[r][c] = new Man(p->color());
+                    else
+                        squares_[r][c] = new King(p->color());
+                } else {
+                    squares_[r][c] = nullptr;
+                }
+            }
+        }
+    }
+    return *this;
 }
 
 void Board::clear() {
@@ -37,11 +71,6 @@ void Board::initialize() {
                 squares_[row][col] = new Man(Color::White);
 }
 
-void Board::placePiece(const Position& pos, Piece* piece) {
-    delete squares_[pos.row][pos.col];
-    squares_[pos.row][pos.col] = piece;
-}
-
 bool Board::isEmpty(const Position& pos) const {
     return squares_[pos.row][pos.col] == nullptr;
 }
@@ -54,24 +83,22 @@ void Board::movePiece(const Position& from, const Position& to) {
     Piece* p = squares_[from.row][from.col];
     squares_[to.row][to.col] = p;
     squares_[from.row][from.col] = nullptr;
+    if (p->type() == PieceType::Man) {
+        Color c = p->color();
+        if ((c == Color::Black && to.row == 7) || (c == Color::White && to.row == 0)) {
+            delete p;
+            squares_[to.row][to.col] = new King(c);
+        }
 
-    // Eliminar piezas capturadas (si el movimiento es un salto)
-    if (std::abs(to.row - from.row) == 2) {
-        int middleRow = (from.row + to.row) / 2;
-        int middleCol = (from.col + to.col) / 2;
-        removePiece(Position{middleRow, middleCol});
-    }
-
-    // Promoción a dama
-    if (p->type() == PieceType::Man && 
-        ((p->color() == Color::Black && to.row == 7) || 
-         (p->color() == Color::White && to.row == 0))) {
-        delete p;
-        squares_[to.row][to.col] = new King(p->color());
     }
 }
 
 void Board::removePiece(const Position& pos) {
     delete squares_[pos.row][pos.col];
     squares_[pos.row][pos.col] = nullptr;
+}
+
+void Board::placePiece(const Position& pos, Piece* piece) {
+    delete squares_[pos.row][pos.col];
+    squares_[pos.row][pos.col] = piece;
 }

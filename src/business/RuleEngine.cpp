@@ -2,7 +2,22 @@
 #include "Board.h"
 #include "Man.h"
 #include "King.h"
-#include <vector>
+#include <algorithm>
+
+bool RuleEngine::isValidMove(const Board& board, const Move& move) const {
+    auto captures = generateAllCaptures(board, board.getPiece(move.from())->color());
+    if (!captures.empty()) {
+        return std::any_of(captures.begin(), captures.end(), [&](const Move& m) {
+            return m.from().row == move.from().row && m.from().col == move.from().col &&
+                   m.to().row == move.to().row && m.to().col == move.to().col;
+        });
+    }
+    auto simple = generateAllSimple(board, board.getPiece(move.from())->color());
+    return std::any_of(simple.begin(), simple.end(), [&](const Move& m) {
+        return m.from().row == move.from().row && m.from().col == move.from().col &&
+               m.to().row == move.to().row && m.to().col == move.to().col;
+    });
+}
 
 std::vector<Move> RuleEngine::generateAllSimple(const Board& board, Color playerColor) const {
     std::vector<Move> moves;
@@ -12,7 +27,10 @@ std::vector<Move> RuleEngine::generateAllSimple(const Board& board, Color player
             Piece* p = board.getPiece(pos);
             if (p && p->color() == playerColor) {
                 auto vm = p->validMoves(board, pos);
-                moves.insert(moves.end(), vm.begin(), vm.end());
+                for (const auto& move : vm) {
+                    if (!move.isCapture())
+                        moves.push_back(move);
+                }
             }
         }
     }
@@ -23,60 +41,16 @@ std::vector<Move> RuleEngine::generateAllCaptures(const Board& board, Color play
     std::vector<Move> captures;
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
-            Position from{r, c};
-            Piece* p = board.getPiece(from);
+            Position pos{r, c};
+            Piece* p = board.getPiece(pos);
             if (p && p->color() == playerColor) {
-                auto localCaptures = generatePieceCaptures(board, from, p);
-                captures.insert(captures.end(), localCaptures.begin(), localCaptures.end());
+                auto moves = p->validMoves(board, pos);
+                for (const auto& move : moves) {
+                    if (move.isCapture())
+                        captures.push_back(move);
+
             }
         }
     }
     return captures;
-}
-
-std::vector<Move> RuleEngine::generatePieceCaptures(const Board& board, const Position& from, const Piece* piece) const {
-    std::vector<Move> captures;
-    Color self = piece->color();
-
-    std::vector<std::pair<int, int>> directions = {
-        {-1, -1}, {-1, 1}, {1, -1}, {1, 1}
-    };
-
-    for (const auto& [dr, dc] : directions) {
-        Position over{from.row + dr, from.col + dc};
-        Position landing{from.row + 2 * dr, from.col + 2 * dc};
-
-        if (isValidPosition(over) && isValidPosition(landing)) {
-            Piece* middle = board.getPiece(over);
-            if (middle && middle->color() != self && board.isEmpty(landing)) {
-                Move m(from, landing, true);
-                captures.push_back(m);
-            }
-        }
-    }
-
-    return captures;
-}
-
-bool RuleEngine::isValidMove(const Board& board, const Move& move) const {
-    Piece* p = board.getPiece(move.from());
-    if (!p || !board.isEmpty(move.to())) return false;
-
-    // Verificar capturas primero (prioridad)
-    auto captures = generateAllCaptures(board, p->color());
-    for (const auto& m : captures) {
-        if (m.to() == move.to() && m.from() == move.from()) {
-            return true;
-        }
-    }
-
-    // Si no hay capturas posibles, verificar movimientos simples
-    auto simpleMoves = generateAllSimple(board, p->color());
-    for (const auto& m : simpleMoves) {
-        if (m.to() == move.to()) {
-            return true;
-        }
-    }
-
-    return false;
 }
