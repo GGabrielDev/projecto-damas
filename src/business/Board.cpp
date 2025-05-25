@@ -1,3 +1,4 @@
+#include <cmath>
 #include "Board.h"
 #include "Man.h"
 #include "King.h"
@@ -88,6 +89,7 @@ void Board::movePiece(const Position& from, const Position& to) {
             delete p;
             squares_[to.row][to.col] = new King(c);
         }
+
     }
 }
 

@@ -48,7 +48,7 @@ std::vector<Move> RuleEngine::generateAllCaptures(const Board& board, Color play
                 for (const auto& move : moves) {
                     if (move.isCapture())
                         captures.push_back(move);
-                }
+
             }
         }
     }

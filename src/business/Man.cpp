@@ -42,10 +42,19 @@ std::vector<Move> Man::validMoves(const Board& board, const Position& from) cons
     // Movimientos simples
     for (int dc : {-1, 1}) {
         Position to{from.row + dir, from.col + dc};
-        if (to.row >= 0 && to.row < 8 && to.col >= 0 && to.col < 8) {
-            if (board.isEmpty(to)) {
-                moves.emplace_back(from, to, false);
-            }
+        if (isValidPosition(to) && board.isEmpty(to)) {
+            moves.emplace_back(from, to, false);
+        }
+    }
+
+    // Capturas (saltos)
+    for (int dc : {-2, 2}) {
+        Position to{from.row + 2 * dir, from.col + dc};
+        Position over{from.row + dir, from.col + dc / 2};
+
+        if (isValidPosition(to) && board.isEmpty(to) && 
+            board.getPiece(over) && board.getPiece(over)->color() != color_) {
+            moves.emplace_back(from, to, true);
         }
     }
 
@@ -54,6 +63,6 @@ std::vector<Move> Man::validMoves(const Board& board, const Position& from) cons
     std::vector<Position> path = {from};
     exploreCaptures(board, from, color_, path, captures);
     moves.insert(moves.end(), captures.begin(), captures.end());
-
+  
     return moves;
 }

@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 project(projecto-damas)
 
 set(CMAKE_CXX_STANDARD 17)
-include_directories(include)
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Librería core del negocio
 add_library(core
@@ -12,6 +16,7 @@ add_library(core
     src/business/Move.cpp
     src/business/Piece.cpp
     src/business/RuleEngine.cpp
+    src/presentation/ConsoleUI.cpp
 )
 target_include_directories(core PUBLIC include)
 
