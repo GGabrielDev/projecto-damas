@@ -37,3 +37,8 @@ add_executable(TestCaptures test_captures.cpp)
 target_include_directories(TestCaptures PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(TestCaptures PRIVATE core)
 add_test(NAME Captures COMMAND TestCaptures)
+
+add_executable(TestMultiCapture test_multi_capture.cpp)
+target_include_directories(TestMultiCapture PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(TestMultiCapture PRIVATE core)
+add_test(NAME MultiCapture COMMAND TestMultiCapture)

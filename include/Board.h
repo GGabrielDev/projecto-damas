@@ -9,7 +9,10 @@
 class Board {
 public:
     Board();
+    Board(const Board& other); // copia profunda
+    Board& operator=(const Board& other); // asignacion profunda
     ~Board();
+
     void clear();
     void initialize();
     void placePiece(const Position& pos, Piece* piece);
