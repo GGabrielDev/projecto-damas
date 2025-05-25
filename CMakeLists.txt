@@ -16,7 +16,6 @@ add_library(core
     src/business/Move.cpp
     src/business/Piece.cpp
     src/business/RuleEngine.cpp
-    src/presentation/ConsoleUI.cpp
 )
 target_include_directories(core PUBLIC include)
 

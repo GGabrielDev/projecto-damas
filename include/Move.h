@@ -6,6 +6,7 @@
 
 class Move {
 public:
+    Move() = default;
     Move(Position from, Position to, bool isCapture);
 
     Position from() const;

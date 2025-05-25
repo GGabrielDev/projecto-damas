@@ -3,6 +3,7 @@
 #include "Man.h"
 #include "King.h"
 #include <algorithm>
+#include <unordered_map>
 
 bool RuleEngine::isValidMove(const Board& board, const Move& move) const {
     auto captures = generateAllCaptures(board, board.getPiece(move.from())->color());
@@ -38,7 +39,8 @@ std::vector<Move> RuleEngine::generateAllSimple(const Board& board, Color player
 }
 
 std::vector<Move> RuleEngine::generateAllCaptures(const Board& board, Color playerColor) const {
-    std::vector<Move> captures;
+    std::unordered_map<int, Move> bestCapturesByFrom; // key: row*8 + col
+
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
             Position pos{r, c};
@@ -46,11 +48,19 @@ std::vector<Move> RuleEngine::generateAllCaptures(const Board& board, Color play
             if (p && p->color() == playerColor) {
                 auto moves = p->validMoves(board, pos);
                 for (const auto& move : moves) {
-                    if (move.isCapture())
-                        captures.push_back(move);
-
+                    if (!move.isCapture()) continue;
+                    int key = move.from().row * 8 + move.from().col;
+                    auto it = bestCapturesByFrom.find(key);
+                    if (it == bestCapturesByFrom.end() || move.path().size() > it->second.path().size()) {
+                        bestCapturesByFrom[key] = move;
+                    }
+                }
             }
         }
     }
-    return captures;
+
+    std::vector<Move> filtered;
+    for (const auto& [_, m] : bestCapturesByFrom)
+        filtered.push_back(m);
+    return filtered;
 }
