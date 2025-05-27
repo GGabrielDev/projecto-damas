@@ -42,3 +42,13 @@ add_executable(TestMultiCapture test_multi_capture.cpp)
 target_include_directories(TestMultiCapture PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(TestMultiCapture PRIVATE core)
 add_test(NAME MultiCapture COMMAND TestMultiCapture)
+
+add_executable(TestApplyMove test_apply_move.cpp)
+target_include_directories(TestApplyMove PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(TestApplyMove core)
+add_test(NAME ApplyMove COMMAND TestApplyMove)
+
+add_executable(TestSmokeCapture test_smoke_capture.cpp)
+target_include_directories(TestSmokeCapture PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(TestSmokeCapture core)
+add_test(NAME SmokeCapture COMMAND TestSmokeCapture)

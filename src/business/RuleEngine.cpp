@@ -3,7 +3,7 @@
 #include "Man.h"
 #include "King.h"
 #include <algorithm>
-#include <unordered_map>
+#include <iostream>
 
 bool RuleEngine::isValidMove(const Board& board, const Move& move) const {
     auto captures = generateAllCaptures(board, board.getPiece(move.from())->color());
@@ -39,8 +39,7 @@ std::vector<Move> RuleEngine::generateAllSimple(const Board& board, Color player
 }
 
 std::vector<Move> RuleEngine::generateAllCaptures(const Board& board, Color playerColor) const {
-    std::unordered_map<int, Move> bestCapturesByFrom; // key: row*8 + col
-
+    std::vector<Move> captures;
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
             Position pos{r, c};
@@ -48,19 +47,42 @@ std::vector<Move> RuleEngine::generateAllCaptures(const Board& board, Color play
             if (p && p->color() == playerColor) {
                 auto moves = p->validMoves(board, pos);
                 for (const auto& move : moves) {
-                    if (!move.isCapture()) continue;
-                    int key = move.from().row * 8 + move.from().col;
-                    auto it = bestCapturesByFrom.find(key);
-                    if (it == bestCapturesByFrom.end() || move.path().size() > it->second.path().size()) {
-                        bestCapturesByFrom[key] = move;
-                    }
+                    if (move.isCapture())
+                        captures.push_back(move);
                 }
             }
         }
     }
+    return captures;
+}
 
-    std::vector<Move> filtered;
-    for (const auto& [_, m] : bestCapturesByFrom)
-        filtered.push_back(m);
-    return filtered;
+void RuleEngine::applyMove(Board& board, const Move& move) const {
+    const auto& path = move.path();
+    if (move.isCapture()) {
+        for (size_t i = 0; i < path.size() - 1; ++i) {
+            Position from = path[i];
+            Position to = path[i + 1];
+
+            // Solo capturamos si es un salto de dos posiciones
+            if (std::abs(from.row - to.row) == 2 && std::abs(from.col - to.col) == 2) {
+                Position mid{(from.row + to.row) / 2, (from.col + to.col) / 2};
+
+                if (mid.row < 0 || mid.row >= 8 || mid.col < 0 || mid.col >= 8) {
+                    std::cerr << "[ERROR] Mid position out of bounds: (" << mid.row << "," << mid.col << ")\n";
+                    continue;
+                }
+
+                Piece* target = board.getPiece(mid);
+                if (!target) {
+                    std::cerr << "[ERROR] Tried to capture empty square at: (" << mid.row << "," << mid.col << ")\n";
+                } else {
+                    board.removePiece(mid);
+                }
+            }
+
+            board.movePiece(from, to);
+        }
+    } else {
+        board.movePiece(move.from(), move.to());
+    }
 }

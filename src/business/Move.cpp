@@ -36,3 +36,7 @@ const std::vector<Position>& Move::path() const {
 void Move::addToPath(const Position& pos) {
     path_.insert(path_.end() - 1, pos);
 }
+
+void Move::addIntermediate(const Position& pos) {
+    path_.insert(path_.end() - 1, pos);
+}

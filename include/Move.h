@@ -14,6 +14,7 @@ public:
     bool isCapture() const;
     const std::vector<Position>& path() const;
     void addToPath(const Position& pos);
+    void addIntermediate(const Position& pos);
 
 private:
     Position from_;

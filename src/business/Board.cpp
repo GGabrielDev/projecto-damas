@@ -1,7 +1,7 @@
-#include <cmath>
 #include "Board.h"
 #include "Man.h"
 #include "King.h"
+#include <cmath>
 
 Board::Board()
     : squares_{} {}

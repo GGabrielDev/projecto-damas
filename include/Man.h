@@ -6,6 +6,7 @@
 class Man : public Piece {
 public:
     Man(Color color);
+    char type() const;
     std::vector<Move> validMoves(const Board& board, const Position& from) const override;
 };
 
