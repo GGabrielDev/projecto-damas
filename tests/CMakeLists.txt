@@ -52,3 +52,8 @@ add_executable(TestSmokeCapture test_smoke_capture.cpp)
 target_include_directories(TestSmokeCapture PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(TestSmokeCapture core)
 add_test(NAME SmokeCapture COMMAND TestSmokeCapture)
+
+add_executable(TestGameOver test_game_over.cpp)
+target_include_directories(TestGameOver PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(TestGameOver core)
+add_test(NAME GameOver COMMAND TestGameOver)
