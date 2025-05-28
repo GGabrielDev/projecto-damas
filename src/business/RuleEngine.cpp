@@ -1,5 +1,6 @@
 #include "RuleEngine.h"
 #include "Board.h"
+#include "GameResult.h"
 #include "Man.h"
 #include "King.h"
 #include <algorithm>
@@ -85,4 +86,52 @@ void RuleEngine::applyMove(Board& board, const Move& move) const {
     } else {
         board.movePiece(move.from(), move.to());
     }
+}
+
+bool RuleEngine::isGameOver(const Board& board, Color currentPlayer, GameResult& result) const {
+    bool hasPieces = false;
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            Piece* p = board.getPiece({r, c});
+            if (p && p->color() == currentPlayer) {
+                hasPieces = true;
+                break;
+            }
+        }
+    }
+
+    if (!hasPieces) {
+        result = (currentPlayer == Color::White) ? GameResult::WinBlack : GameResult::WinWhite;
+        std::cout << "[DEBUG] No hay piezas restantes\n";
+        return true;
+    }
+
+    auto captures = generateAllCaptures(board, currentPlayer);
+    if (!captures.empty()) {
+        std::cout << "[DEBUG] Hay capturas válidas:\n";
+        for (const auto& m : captures) {
+            std::cout << "  Captura: ";
+            for (const auto& p : m.path()) {
+                std::cout << "(" << p.row << "," << p.col << ") ";
+            }
+            std::cout << std::endl;
+        }
+        result = GameResult::Ongoing;
+        return false;
+    }
+
+    auto simple = generateAllSimple(board, currentPlayer);
+    if (!simple.empty()) {
+        std::cout << "[DEBUG] Hay movimientos simples válidos:\n";
+        for (const auto& m : simple) {
+            std::cout << "  De (" << m.from().row << "," << m.from().col << ") a ("
+                      << m.to().row << "," << m.to().col << ")\n";
+        }
+        result = GameResult::Ongoing;
+        return false;
+    }
+
+    result = (currentPlayer == Color::White) ? GameResult::WinBlack : GameResult::WinWhite;
+    std::cout << "[DEBUG] No hay movimientos válidos restantes\n";
+    return true;
 }

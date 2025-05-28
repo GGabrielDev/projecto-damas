@@ -1,4 +1,6 @@
 #include "Board.h"
+#include "GameResult.h"
+#include "Man.h"
 #include "RuleEngine.h"
 #include <iostream>
 #include <cassert>
@@ -20,14 +22,23 @@ void test_no_valid_moves() {
     Board board;
     RuleEngine engine;
     board.clear();
+
+    // Pieza blanca bloqueada en la fila superior sin movimientos posibles
     board.placePiece({0, 1}, new Man(Color::White));
-    board.placePiece({1, 2}, new Man(Color::Black)); // blocked by edge and ally
+
+    // Oponente (Black) aún tiene piezas
+    board.placePiece({7, 0}, new Man(Color::Black));
+    board.placePiece({7, 2}, new Man(Color::Black));
 
     GameResult result;
-    bool over = engine.isGameOver(board, Color::Black, result);
+    bool over = engine.isGameOver(board, Color::White, result);
+
+    std::cout << "[TEST] Resultado isGameOver: " << std::boolalpha << over << "\n";
+    std::cout << "[TEST] GameResult: " << static_cast<int>(result) << "\n";
+
     assert(over);
-    assert(result == GameResult::WinWhite);
-    std::cout << "[OK] Win by no valid moves\n";
+    assert(result == GameResult::WinBlack);
+    std::cout << "[OK] Game over por no tener movimientos válidos\n";
 }
 
 void test_not_over_yet() {

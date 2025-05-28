@@ -18,7 +18,7 @@ std::vector<Move> Man::validMoves(const Board& board, const Position& from) cons
     std::vector<Move> moves;
     int dir = (color() == Color::White) ? -1 : 1;
 
-    // Simple moves
+    // Movimiento simple
     for (int dc : {-1, 1}) {
         Position to{from.row + dir, from.col + dc};
         if (to.row >= 0 && to.row < 8 && to.col >= 0 && to.col < 8 && board.isEmpty(to)) {
@@ -26,9 +26,26 @@ std::vector<Move> Man::validMoves(const Board& board, const Position& from) cons
         }
     }
 
-    // Captures (recursive)
-    std::vector<Position> startPath = { from };
-    exploreCaptures(board, from, color(), startPath, moves);
+    // Exploración de captura (solo si hay posibles oponentes adyacentes)
+    bool hasEnemyNearby = false;
+    for (int dr : {-1, 1}) {
+        for (int dc : {-1, 1}) {
+            Position over{from.row + dr, from.col + dc};
+            if (over.row >= 0 && over.row < 8 && over.col >= 0 && over.col < 8) {
+                Piece* maybeEnemy = board.getPiece(over);
+                if (maybeEnemy && maybeEnemy->color() != color()) {
+                    hasEnemyNearby = true;
+                    break;
+                }
+            }
+        }
+        if (hasEnemyNearby) break;
+    }
+
+    if (hasEnemyNearby) {
+        std::vector<Position> startPath = { from };
+        exploreCaptures(board, from, color(), startPath, moves);
+    }
 
     return moves;
 }
@@ -47,10 +64,20 @@ void exploreCaptures(const Board& board, const Position& from, Color color,
                 continue;
 
             Piece* middle = board.getPiece(over);
+
+            std::cout << "[DEBUG] En captura: from=(" << from.row << "," << from.col << ") over=(" 
+                      << over.row << "," << over.col << ") to=(" << to.row << "," << to.col << ") ";
+
+            if (!middle)
+                std::cout << "- over está vacío\n";
+            else if (middle->color() == color)
+                std::cout << "- pieza del mismo color\n";
+            else
+                std::cout << "- posible captura\n";
+
             if (middle && middle->color() != color) {
                 Board next = board;
                 next.removePiece(over);
-// src/business/Man.cpp
                 next.movePiece(from, to);
 
                 std::vector<Position> newStops = stops;
