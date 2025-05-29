@@ -70,6 +70,12 @@ classDiagram
         + void saveResult(const GameResult&)
     }
 
+    class GameUI {
+        + void render(const Board&)
+        + Move promptMove(const std::vector<Move>&)
+        + void showResult(GameResult)
+    };
+
     %% Relaciones
     Game --> Board
     Game --> Player

@@ -57,3 +57,8 @@ add_executable(TestGameOver test_game_over.cpp)
 target_include_directories(TestGameOver PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(TestGameOver core)
 add_test(NAME GameOver COMMAND TestGameOver)
+
+add_executable(TestGameConsole test_game_console.cpp)
+target_include_directories(TestGameConsole PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(TestGameConsole core)
+add_test(NAME GameConsole COMMAND TestGameOver)
