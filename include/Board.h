@@ -20,6 +20,7 @@ public:
     Piece* getPiece(const Position& pos) const;
     void movePiece(const Position& from, const Position& to);
     void removePiece(const Position& pos);
+    void print() const;
 
 private:
     std::array<std::array<Piece*, 8>, 8> squares_;

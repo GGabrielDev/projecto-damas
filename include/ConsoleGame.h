@@ -8,14 +8,17 @@
 class ConsoleGame {
 public:
     ConsoleGame();
-    void run();
+    void run();                      // aún presente, puede ser usado para simulaciones
+    void start();                    // punto de entrada interactivo principal
+    void playHumanVsHuman();        // modo principal de juego
+    void printBoard() const;        // accesible desde pruebas
 
     void switchTurn();
-    void printBoard() const;
+
 private:
     Board board_;
-    RuleEngine engine_;
-    Color currentTurn_;
+    RuleEngine rules_;
+    Color currentPlayer_;
 };
 
 #endif // CONSOLE_GAME_H

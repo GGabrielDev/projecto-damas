@@ -1,6 +1,7 @@
-#include <iostream>
+#include "ConsoleGame.h"
 
 int main() {
-  std::cout << "Proyecto Damas 2025 iniciado correctamente.\n";
-  return 0;
+    ConsoleGame game;
+    game.start();
+    return 0;
 }

@@ -2,6 +2,7 @@
 #include "Man.h"
 #include "King.h"
 #include <cmath>
+#include <iostream>
 
 Board::Board()
     : squares_{} {}
@@ -101,4 +102,23 @@ void Board::removePiece(const Position& pos) {
 void Board::placePiece(const Position& pos, Piece* piece) {
     delete squares_[pos.row][pos.col];
     squares_[pos.row][pos.col] = piece;
+}
+
+void Board::print() const {
+    std::cout << "    0 1 2 3 4 5 6 7\n";
+    std::cout << "   ----------------\n";
+    for (int row = 0; row < 8; ++row) {
+        std::cout << " " << row << " |";
+        for (int col = 0; col < 8; ++col) {
+            Piece* p = squares_[row][col];
+            if (!p) {
+                std::cout << " .";
+            } else {
+                char symbol = (p->type() == PieceType::Man) ? 'm' : 'k';
+                symbol = (p->color() == Color::White) ? toupper(symbol) : symbol;
+                std::cout << " " << symbol;
+            }
+        }
+        std::cout << "\n";
+    }
 }

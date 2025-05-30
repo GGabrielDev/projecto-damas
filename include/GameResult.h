@@ -8,4 +8,6 @@ enum class GameResult {
     Ongoing
 };
 
+const char* to_string(GameResult result);
+
 #endif // GAMERESULT_H
