@@ -22,7 +22,7 @@ void test_main_menu_logic() {
     std::string result = output.str();
 
     assert(result.find("TUTORIAL") != std::string::npos);
-    assert(result.find("Goodbye!") != std::string::npos);
+    assert(result.find("¡Adiós!") != std::string::npos);
 
     std::cout << "[OK] test_main_menu_logic passed\n";
 }

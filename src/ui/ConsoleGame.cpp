@@ -62,7 +62,7 @@ void ConsoleGame::start() {
             printTutorial();
             waitForEnter();
         } else if (option == 3) {
-            std::cout << "Adiós!\n";
+            std::cout << "¡Adiós!\n";
             break;
         } else {
             std::cout << "Opción Invalida. Intente de nuevo.\n";
