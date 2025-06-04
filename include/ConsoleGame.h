@@ -4,21 +4,23 @@
 #include "Board.h"
 #include "Piece.h"
 #include "RuleEngine.h"
+#include <vector>
+#include <string>
 
 class ConsoleGame {
 public:
     ConsoleGame();
-    void run();                      // aún presente, puede ser usado para simulaciones
-    void start();                    // punto de entrada interactivo principal
-    void playHumanVsHuman();        // modo principal de juego
-    void printBoard() const;        // accesible desde pruebas
-
+    void run();
+    void start();
+    void playHumanVsHuman();
+    void printBoard() const;
     void switchTurn();
 
 private:
     Board board_;
     RuleEngine rules_;
     Color currentPlayer_;
+    std::vector<std::string> moveHistory_;
 };
 
 #endif // CONSOLE_GAME_H
