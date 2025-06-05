@@ -76,6 +76,16 @@ void exploreCaptures(const Board& board, const Position& from, Color color,
                 std::cout << "- posible captura\n";
 
             if (middle && middle->color() != color) {
+                // Verificar que 'to' no está ya en stops (evitar bucles)
+                bool already = false;
+                for (auto& s : stops) {
+                    if (s.row == to.row && s.col == to.col) {
+                        already = true;
+                        break;
+                    }
+                }
+                if (already) continue;
+
                 Board next = board;
                 next.removePiece(over);
                 next.movePiece(from, to);
