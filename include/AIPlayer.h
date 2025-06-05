@@ -1,16 +1,24 @@
 #ifndef AIPLAYER_H
 #define AIPLAYER_H
 
-#include "Player.h"
+#include "Board.h"
+#include "RuleEngine.h"
+#include "Move.h"
+#include "Position.h"
 
-class AIPlayer : public Player {
+/// AIPlayer elige un movimiento legal usando RuleEngine.
+/// Para profundidad > 1 podría implementarse minimax, pero aquí basta con 1.
+class AIPlayer {
 public:
-    AIPlayer(int depth);
-    Move chooseMove(Board& board, RuleEngine& rules) override;
+    /// depth no se usa en esta versión básica, pero queda para futuro.
+    explicit AIPlayer(int depth = 1);
+
+    /// Devuelve un Move válido para el color activo (se asume que 
+    /// el llamador sabe pasar el color correcto por RuleEngine).
+    Move chooseMove(const Board& board, RuleEngine& engine);
 
 private:
     int depth_;
-    int minimax(Board& board, int depth, bool maximizingPlayer, int alpha, int beta);
 };
 
 #endif // AIPLAYER_H

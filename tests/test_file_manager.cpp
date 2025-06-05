@@ -39,7 +39,13 @@ void test_save_and_list_and_load() {
     assert(contenido == rec.moves && "loadGameRecord no devolvió el contenido esperado");
 
     // 6. Cleanup: eliminar el archivo de prueba
+    // Limpieza del archivo
     fs::remove(fullPath);
+
+    // Limpieza del directorio si está vacío
+    if (fs::is_empty("saves")) {
+        fs::remove("saves");
+    }
 
     std::cout << "[OK] test_save_and_list_and_load passed\n";
 }

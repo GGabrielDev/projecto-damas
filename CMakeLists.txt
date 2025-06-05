@@ -10,6 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Librería core del negocio
 add_library(core
+    src/business/AIPlayer.cpp
     src/business/Board.cpp
     src/business/FileManager.cpp
     src/business/GameResult.cpp
