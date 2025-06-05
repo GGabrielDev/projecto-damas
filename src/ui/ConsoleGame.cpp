@@ -51,6 +51,15 @@ namespace {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cin.get();
     }
+
+    bool readInt(int& out) {
+        if (!(std::cin >> out)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            return false;
+        }
+        return true;
+    }
 }
 
 ConsoleGame::ConsoleGame() : currentPlayer_(Color::White) {}
@@ -61,43 +70,58 @@ void ConsoleGame::start() {
         printMainMenu();
 
         int option;
-        std::cin >> option;
+        if (!readInt(option)) {
+            std::cout << "Entrada inválida. Intente con un número entre 1 y 4." << '\n';
+            waitForEnter();
+            continue;
+        }
         clearScreen();
 
-        if (option == 1) {
-            playHumanVsHuman();
-        } else if (option == 2) {
-            printTutorial();
-            waitForEnter();
-        } else if (option == 3) {
-            // Listar partidas guardadas
-            FileManager fm;
-            auto lista = fm.listSavedGames();
-            if (lista.empty()) {
-                std::cout << "No hay partidas guardadas." << '\n';
-            } else {
-                std::cout << "Partidas guardadas:" << '\n';
-                int idx = 1;
-                for (const auto& nombre : lista) {
-                    std::cout << " " << idx++ << ". " << nombre << '\n';
-                }
-                std::cout << "Selecciona número para ver detalles (0 para volver): ";
-                int sel; std::cin >> sel;
-                clearScreen();
-                if (sel > 0 && sel <= (int)lista.size()) {
-                    auto contenido = fm.loadGameRecord(lista[sel - 1]);
-                    std::cout << "--- Contenido de " << lista[sel - 1] << " ---" << '\n';
-                    std::cout << contenido << '\n';
-                    std::cout << "-------------------------------" << "\n";
+        switch (option) {
+            case 1:
+                playHumanVsHuman();
+                break;
+            case 2:
+                printTutorial();
+                waitForEnter();
+                break;
+            case 3: {
+                FileManager fm;
+                auto lista = fm.listSavedGames();
+                if (lista.empty()) {
+                    std::cout << "No hay partidas guardadas." << '\n';
                     waitForEnter();
+                } else {
+                    std::cout << "Partidas guardadas:" << '\n';
+                    int idx = 1;
+                    for (const auto& nombre : lista) {
+                        std::cout << " " << idx++ << ". " << nombre << '\n';
+                    }
+                    std::cout << "Selecciona número para ver detalles (0 para volver): ";
+                    int sel;
+                    if (!readInt(sel)) {
+                        std::cout << "Entrada inválida. Volviendo al menú." << '\n';
+                        waitForEnter();
+                        break;
+                    }
+                    clearScreen();
+                    if (sel > 0 && sel <= static_cast<int>(lista.size())) {
+                        auto contenido = fm.loadGameRecord(lista[sel - 1]);
+                        std::cout << "--- Contenido de " << lista[sel - 1] << " ---" << '\n';
+                        std::cout << contenido << '\n';
+                        std::cout << "-------------------------------" << "\n";
+                        waitForEnter();
+                    }
                 }
+                break;
             }
-        } else if (option == 4) {
-            std::cout << "¡Adiós!" << '\n';
-            break;
-        } else {
-            std::cout << "Opción inválida. Intente de nuevo." << '\n';
-            waitForEnter();
+            case 4:
+                std::cout << "¡Adiós!" << '\n';
+                return;
+            default:
+                std::cout << "Opción inválida. Intente de nuevo." << '\n';
+                waitForEnter();
+                break;
         }
     }
 }
@@ -115,21 +139,19 @@ void ConsoleGame::playHumanVsHuman() {
         GameResult resultado;
         if (rules_.isGameOver(board_, currentPlayer_, resultado)) {
             std::cout << "\nSe acabó el juego! Resultado: " << ::to_string(resultado) << "\n";
-            
-            // Construir timestamp
+
             auto now = std::chrono::system_clock::now();
             std::time_t t = std::chrono::system_clock::to_time_t(now);
             std::tm tm{};
-        #ifdef _WIN32
+#ifdef _WIN32
             localtime_s(&tm, &t);
-        #else
+#else
             localtime_r(&t, &tm);
-        #endif
+#endif
             std::ostringstream ss;
             ss << std::put_time(&tm, "%Y%m%d_%H%M%S");
             std::string timestamp = ss.str();
 
-            // Convertir resultado a texto
             std::string resultadoStr;
             switch (resultado) {
                 case GameResult::WinWhite: resultadoStr = "BlancoGana"; break;
@@ -138,7 +160,6 @@ void ConsoleGame::playHumanVsHuman() {
                 default:                   resultadoStr = "EnJuego";     break;
             }
 
-            // Concatenar movimientos
             std::ostringstream movesOss;
             for (size_t i = 0; i < moveHistory_.size(); ++i) {
                 movesOss << moveHistory_[i];
@@ -146,7 +167,6 @@ void ConsoleGame::playHumanVsHuman() {
             }
             std::string movesStr = movesOss.str();
 
-            // Crear y guardar GameRecord
             GameRecord rec;
             rec.gameType = "HumanVsHuman";
             rec.datetime = timestamp;
@@ -163,14 +183,18 @@ void ConsoleGame::playHumanVsHuman() {
             }
 
             waitForEnter();
-            break;
+            return;
         }
 
         std::cout << "Turno de las " << (currentPlayer_ == Color::White ? "Blancas" : "Negras") << "\n";
         std::cout << "Ingrese movimiento (ej. 2 3 3 4): fila origen, columna origen, fila destino, columna destino" << "\n> ";
 
         int fr, fc, tr, tc;
-        std::cin >> fr >> fc >> tr >> tc;
+        if (!readInt(fr) || !readInt(fc) || !readInt(tr) || !readInt(tc)) {
+            std::cout << "Entrada inválida. Use cuatro números separados por espacios." << "\n";
+            waitForEnter();
+            continue;
+        }
         Position from{fr, fc}, to{tr, tc};
         clearScreen();
 
@@ -185,7 +209,6 @@ void ConsoleGame::playHumanVsHuman() {
 
         if (rules_.isValidMove(board_, move)) {
             rules_.applyMove(board_, move);
-            // Registrar movimiento
             std::ostringstream oss;
             oss << from.row << " " << from.col << " " << to.row << " " << to.col;
             moveHistory_.push_back(oss.str());
