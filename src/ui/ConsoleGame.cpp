@@ -360,6 +360,7 @@ void ConsoleGame::playAIVsAI() {
     currentPlayer_ = Color::White;
     AIPlayer whiteAI(1);
     AIPlayer blackAI(1);
+    int nonProgressTurns = 0;
 
     while (true) {
         clearScreen();
@@ -374,12 +375,35 @@ void ConsoleGame::playAIVsAI() {
             return;
         }
 
+        int whiteCount = board_.countPieces(Color::White);
+        int blackCount = board_.countPieces(Color::Black);
+        if (whiteCount <= 6 && blackCount <= 6 && nonProgressTurns >= 40) {
+            std::cout << "\nSe declara empate por inactividad prolongada.\n";
+            saveGame("AIvsAI", "Empate", moveHistory_);
+            waitForEnter();
+            return;
+        }
+
         std::cout << "Turno de la IA (" << (currentPlayer_ == Color::White ? "Blancas" : "Negras") << ")...\n";
         AIPlayer& currentAI = (currentPlayer_ == Color::White) ? whiteAI : blackAI;
         Move move = currentAI.chooseMove(board_, rules_, currentPlayer_);
 
         if (move.from().row != -1) {
+            bool wasCapture = move.isCapture();
+            bool wasPromotion = false;
+            Piece* before = board_.getPiece(move.from());
+
             rules_.applyMove(board_, move);
+
+            Piece* after = board_.getPiece(move.to());
+            if (before && after && before != after && after->type() == PieceType::King)
+                wasPromotion = true;
+
+            if (wasCapture || wasPromotion)
+                nonProgressTurns = 0;
+            else
+                ++nonProgressTurns;
+
             std::ostringstream oss;
             oss << move.from().row << " " << move.from().col << " "
                 << move.to().row << " " << move.to().col;

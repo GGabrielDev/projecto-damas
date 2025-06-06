@@ -21,6 +21,7 @@ public:
     void movePiece(const Position& from, const Position& to);
     void removePiece(const Position& pos);
     void print() const;
+    int countPieces(Color color) const;
 
 private:
     std::array<std::array<Piece*, 8>, 8> squares_;

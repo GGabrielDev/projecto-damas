@@ -122,3 +122,16 @@ void Board::print() const {
         std::cout << "\n";
     }
 }
+
+int Board::countPieces(Color color) const {
+    int count = 0;
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            const Piece* p = squares_[row][col];
+            if (p && p->color() == color) {
+                ++count;
+            }
+        }
+    }
+    return count;
+}
