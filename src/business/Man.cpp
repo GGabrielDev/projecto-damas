@@ -1,6 +1,7 @@
 #include "Man.h"
 #include "Board.h"
 #include "Move.h"
+#include <algorithm>  // <-- necesario para std::find
 #include <vector>
 #include <cmath>
 #include <iostream>
@@ -52,50 +53,44 @@ std::vector<Move> Man::validMoves(const Board& board, const Position& from) cons
 
 void exploreCaptures(const Board& board, const Position& from, Color color,
                      std::vector<Position> stops, std::vector<Move>& captures) {
-    static const int dirs[2] = {-1, 1};
+    const int forward = (color == Color::White) ? -1 : 1;
     bool found = false;
 
-    for (int dr : dirs) {
-        for (int dc : dirs) {
-            Position over{from.row + dr, from.col + dc};
-            Position to{from.row + 2 * dr, from.col + 2 * dc};
+    for (int dc : {-1, 1}) {
+        int dr = forward;
+        Position over{from.row + dr, from.col + dc};
+        Position to{from.row + 2 * dr, from.col + 2 * dc};
 
-            if (to.row < 0 || to.row >= 8 || to.col < 0 || to.col >= 8 || !board.isEmpty(to))
+        if (to.row < 0 || to.row >= 8 || to.col < 0 || to.col >= 8 || !board.isEmpty(to))
+            continue;
+
+        Piece* middle = board.getPiece(over);
+
+        std::cout << "[DEBUG] En captura: from=(" << from.row << "," << from.col << ") over=(" 
+                  << over.row << "," << over.col << ") to=(" << to.row << "," << to.col << ") ";
+
+        if (!middle)
+            std::cout << "- over está vacío\n";
+        else if (middle->color() == color)
+            std::cout << "- pieza del mismo color\n";
+        else
+            std::cout << "- posible captura\n";
+
+        if (middle && middle->color() != color) {
+            if (std::find(stops.begin(), stops.end(), to) != stops.end()) {
+                std::cout << "[DEBUG] Ciclo detectado: salto a (" << to.row << "," << to.col << ") ya visitado\n";
                 continue;
-
-            Piece* middle = board.getPiece(over);
-
-            std::cout << "[DEBUG] En captura: from=(" << from.row << "," << from.col << ") over=(" 
-                      << over.row << "," << over.col << ") to=(" << to.row << "," << to.col << ") ";
-
-            if (!middle)
-                std::cout << "- over está vacío\n";
-            else if (middle->color() == color)
-                std::cout << "- pieza del mismo color\n";
-            else
-                std::cout << "- posible captura\n";
-
-            if (middle && middle->color() != color) {
-                // Verificar que 'to' no está ya en stops (evitar bucles)
-                bool already = false;
-                for (auto& s : stops) {
-                    if (s.row == to.row && s.col == to.col) {
-                        already = true;
-                        break;
-                    }
-                }
-                if (already) continue;
-
-                Board next = board;
-                next.removePiece(over);
-                next.movePiece(from, to);
-
-                std::vector<Position> newStops = stops;
-                newStops.push_back(to);
-
-                exploreCaptures(next, to, color, newStops, captures);
-                found = true;
             }
+
+            Board next = board;
+            next.removePiece(over);
+            next.movePiece(from, to);
+
+            std::vector<Position> newStops = stops;
+            newStops.push_back(to);
+
+            exploreCaptures(next, to, color, newStops, captures);
+            found = true;
         }
     }
 
