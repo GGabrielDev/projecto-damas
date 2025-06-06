@@ -9,23 +9,17 @@
 #include <iostream>
 
 void test_ai_capture_priority() {
-    // 1) Tablero vacío
     Board board;
     board.clear();  
 
-    // 2) Colocar una ficha blanca en (4,4) y una negra en (3,3),
-    //    con (2,2) libre para la captura.
     board.placePiece({4,4}, new Man(Color::White));
     board.placePiece({3,3}, new Man(Color::Black));
-    // Posición (2,2) queda vacía por defecto.
 
     RuleEngine engine;
-    AIPlayer ai(1);  // Profundidad 1
+    AIPlayer ai(1);
 
-    // IA juega con blancas → debe capturar de (4,4) a (2,2).
-    Move aiMove = ai.chooseMove(board, engine);
+    Move aiMove = ai.chooseMove(board, engine, Color::White);
 
-    // Verificar que sea captura y que termine en (2,2).
     assert(aiMove.isCapture() && 
            aiMove.from().row == 4 && aiMove.from().col == 4 &&
            aiMove.to().row == 2 && aiMove.to().col == 2);
@@ -36,4 +30,3 @@ int main() {
     test_ai_capture_priority();
     return 0;
 }
-

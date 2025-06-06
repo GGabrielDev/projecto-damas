@@ -10,19 +10,18 @@
 void test_ai_response_after_human_move() {
     Board board;
     RuleEngine engine;
-    AIPlayer ai(/*depth=*/1);
+    AIPlayer ai(1);
 
     board.clear();
 
-    // Humano (blanco) mueve primero
     board.placePiece({5, 0}, new Man(Color::White));
-    board.placePiece({2, 1}, new Man(Color::Black)); // IA debe mover esta
+    board.placePiece({2, 1}, new Man(Color::Black));
 
     Move humanMove({5, 0}, {4, 1}, false);
     assert(engine.isValidMove(board, humanMove));
     engine.applyMove(board, humanMove);
 
-    Move aiMove = ai.chooseMove(board, engine);
+    Move aiMove = ai.chooseMove(board, engine, Color::Black);
     assert(engine.isValidMove(board, aiMove));
     std::cout << "[OK] test_ai_response_after_human_move\n";
 }
@@ -36,11 +35,11 @@ void test_ai_vs_ai_runs_turn() {
     board.initialize();
 
     for (int i = 0; i < 4; ++i) {
-        Move whiteMove = whiteAI.chooseMove(board, engine);
+        Move whiteMove = whiteAI.chooseMove(board, engine, Color::White);
         assert(engine.isValidMove(board, whiteMove));
         engine.applyMove(board, whiteMove);
 
-        Move blackMove = blackAI.chooseMove(board, engine);
+        Move blackMove = blackAI.chooseMove(board, engine, Color::Black);
         assert(engine.isValidMove(board, blackMove));
         engine.applyMove(board, blackMove);
     }
@@ -51,19 +50,18 @@ void test_ai_vs_ai_runs_turn() {
 void test_ai_handles_no_moves() {
     Board board;
     RuleEngine engine;
-    AIPlayer ai(/*depth=*/1);
+    AIPlayer ai(1);
 
     board.clear();
 
-    // Colocar una ficha negra bloqueada completamente
     board.placePiece({0, 0}, new Man(Color::Black));
-    board.placePiece({1, 1}, new Man(Color::White)); // Bloquea diagonal
-    board.placePiece({2, 2}, new Man(Color::White)); // Bloquea salto de captura
+    board.placePiece({1, 1}, new Man(Color::White));
+    board.placePiece({2, 2}, new Man(Color::White));
 
     GameResult result;
     bool over = engine.isGameOver(board, Color::Black, result);
-    assert(over && "Se espera que el juego esté terminado para las negras");
-    assert(result == GameResult::WinWhite && "La IA blanca debería ganar");
+    assert(over);
+    assert(result == GameResult::WinWhite);
 
     std::cout << "[OK] test_ai_handles_no_moves\n";
 }
@@ -77,7 +75,7 @@ void test_console_game_ai_integration_sanity() {
     board.placePiece({2, 1}, new Man(Color::Black));
 
     AIPlayer ai(1);
-    Move aiMove = ai.chooseMove(board, rules);
+    Move aiMove = ai.chooseMove(board, rules, Color::Black);
 
     assert(rules.isValidMove(board, aiMove));
     std::cout << "[OK] test_console_game_ai_integration_sanity\n";

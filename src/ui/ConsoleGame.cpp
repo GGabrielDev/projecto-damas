@@ -63,7 +63,42 @@ namespace {
         }
         return true;
     }
-}
+
+    std::string buildFilename(const std::string& tipo, const std::string& resultado) {
+        auto now = std::chrono::system_clock::now();
+        std::time_t t = std::chrono::system_clock::to_time_t(now);
+        std::tm tm{};
+#ifdef _WIN32
+        localtime_s(&tm, &t);
+#else
+        localtime_r(&t, &tm);
+#endif
+        std::ostringstream ss;
+        ss << std::put_time(&tm, "%Y%m%d_%H%M%S");
+        return tipo + "_" + ss.str() + "_" + resultado;
+    }
+
+    void saveGame(const std::string& tipo, const std::string& resultado, const std::vector<std::string>& history) {
+        std::ostringstream movesOss;
+        for (size_t i = 0; i < history.size(); ++i) {
+            movesOss << history[i];
+            if (i + 1 < history.size()) movesOss << ";";
+        }
+
+        GameRecord rec;
+        rec.gameType = tipo;
+        rec.datetime = buildFilename(tipo, resultado);
+        rec.result = resultado;
+        rec.moves = movesOss.str();
+
+        FileManager fm;
+        if (fm.saveGameRecord(rec)) {
+            std::cout << "Partida guardada en \"saves/" << rec.datetime << ".txt\"\n";
+        } else {
+            std::cout << "Error al guardar la partida.\n";
+        }
+    }
+}  
 
 ConsoleGame::ConsoleGame() : currentPlayer_(Color::White) {}
 
@@ -240,8 +275,12 @@ void ConsoleGame::printBoard() const {
             if (!p) {
                 std::cout << " .";
             } else {
-                char symbol = (p->type() == PieceType::Man) ? 'm' : 'k';
-                symbol = (p->color() == Color::White) ? toupper(symbol) : symbol;
+                char symbol;
+                if (p->color() == Color::White) {
+                    symbol = (p->type() == PieceType::Man) ? 'b' : 'B';
+                } else {
+                    symbol = (p->type() == PieceType::Man) ? 'n' : 'N';
+                }
                 std::cout << " " << symbol;
             }
         }
@@ -253,15 +292,17 @@ void ConsoleGame::playHumanVsAI() {
     board_.initialize();
     moveHistory_.clear();
     currentPlayer_ = Color::White;
-    AIPlayer ai(2);
+    AIPlayer ai(/*depth=*/1);
 
     while (true) {
         clearScreen();
+        std::cout << "\n";
         printBoard();
 
         GameResult result;
         if (rules_.isGameOver(board_, currentPlayer_, result)) {
             std::cout << "\nSe acabó el juego! Resultado: " << ::to_string(result) << "\n";
+            saveGame("HumanVsAI", to_string(result), moveHistory_);
             waitForEnter();
             return;
         }
@@ -269,16 +310,24 @@ void ConsoleGame::playHumanVsAI() {
         if (currentPlayer_ == Color::White) {
             std::cout << "Turno del Humano (Blancas)\n";
             std::cout << "Ingrese movimiento (ej. 2 3 3 4): ";
+
             int fr, fc, tr, tc;
             if (!readInt(fr) || !readInt(fc) || !readInt(tr) || !readInt(tc)) {
-                std::cout << "Entrada inválida." << '\n';
+                std::cout << "Entrada inválida. Use cuatro números separados por espacios.\n";
                 waitForEnter();
                 continue;
             }
+
             Position from{fr, fc}, to{tr, tc};
             Move move(from, to, false);
+
             auto captures = rules_.generateAllCaptures(board_, currentPlayer_);
-            for (const auto& m : captures) if (m.from() == from && m.to() == to) move = m;
+            for (const auto& m : captures) {
+                if (m.from() == from && m.to() == to) {
+                    move = m;
+                    break;
+                }
+            }
 
             if (rules_.isValidMove(board_, move)) {
                 rules_.applyMove(board_, move);
@@ -287,16 +336,19 @@ void ConsoleGame::playHumanVsAI() {
                 moveHistory_.push_back(oss.str());
                 currentPlayer_ = Color::Black;
             } else {
-                std::cout << "Movimiento inválido." << '\n';
+                std::cout << "Movimiento inválido. Intente de nuevo.\n";
                 waitForEnter();
             }
         } else {
-            std::cout << "Turno de la IA (Negras)\n";
-            Move move = ai.chooseMove(board_, rules_);
-            rules_.applyMove(board_, move);
-            std::ostringstream oss;
-            oss << move.from().row << " " << move.from().col << " " << move.to().row << " " << move.to().col;
-            moveHistory_.push_back(oss.str());
+            std::cout << "Turno de la IA (Negras)...\n";
+            Move aiMove = ai.chooseMove(board_, rules_, Color::Black);
+            if (aiMove.from().row != -1) {
+                rules_.applyMove(board_, aiMove);
+                std::ostringstream oss;
+                oss << aiMove.from().row << " " << aiMove.from().col << " "
+                    << aiMove.to().row << " " << aiMove.to().col;
+                moveHistory_.push_back(oss.str());
+            }
             currentPlayer_ = Color::White;
         }
     }
@@ -306,26 +358,34 @@ void ConsoleGame::playAIVsAI() {
     board_.initialize();
     moveHistory_.clear();
     currentPlayer_ = Color::White;
-    AIPlayer whiteAI(2);
-    AIPlayer blackAI(2);
+    AIPlayer whiteAI(1);
+    AIPlayer blackAI(1);
 
     while (true) {
         clearScreen();
+        std::cout << "\n";
         printBoard();
+
         GameResult result;
         if (rules_.isGameOver(board_, currentPlayer_, result)) {
             std::cout << "\nSe acabó el juego! Resultado: " << ::to_string(result) << "\n";
+            saveGame("AIvsAI", to_string(result), moveHistory_);
             waitForEnter();
             return;
         }
 
-        std::cout << "Turno de la IA " << (currentPlayer_ == Color::White ? "(Blancas)" : "(Negras)") << '\n';
+        std::cout << "Turno de la IA (" << (currentPlayer_ == Color::White ? "Blancas" : "Negras") << ")...\n";
         AIPlayer& currentAI = (currentPlayer_ == Color::White) ? whiteAI : blackAI;
-        Move move = currentAI.chooseMove(board_, rules_);
-        rules_.applyMove(board_, move);
-        std::ostringstream oss;
-        oss << move.from().row << " " << move.from().col << " " << move.to().row << " " << move.to().col;
-        moveHistory_.push_back(oss.str());
+        Move move = currentAI.chooseMove(board_, rules_, currentPlayer_);
+
+        if (move.from().row != -1) {
+            rules_.applyMove(board_, move);
+            std::ostringstream oss;
+            oss << move.from().row << " " << move.from().col << " "
+                << move.to().row << " " << move.to().col;
+            moveHistory_.push_back(oss.str());
+        }
+
         currentPlayer_ = (currentPlayer_ == Color::White) ? Color::Black : Color::White;
     }
 }

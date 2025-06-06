@@ -8,42 +8,33 @@
 #include <iostream>
 
 void test_ai_choose_simple_move() {
-    // 1) Tablero en posición inicial
     Board board;
     board.initialize();          
     RuleEngine engine;
-    AIPlayer ai(/*depth=*/1);    
+    AIPlayer ai(1);    
 
-    // AI juega con Blancas (en la prueba asumimos Color::White).
-    Move aiMove = ai.chooseMove(board, engine);
+    Move aiMove = ai.chooseMove(board, engine, Color::White);
 
-    // Recolectar movimientos posibles verdaderos
     auto simpleMoves = engine.generateAllSimple(board, Color::White);
     auto captures    = engine.generateAllCaptures(board, Color::White);
 
     bool found = false;
     for (const auto& m : captures) {
-        if (m.from().row == aiMove.from().row &&
-            m.from().col == aiMove.from().col &&
-            m.to().row   == aiMove.to().row &&
-            m.to().col   == aiMove.to().col) {
+        if (m.from() == aiMove.from() && m.to() == aiMove.to()) {
             found = true;
             break;
         }
     }
     if (!found) {
         for (const auto& m : simpleMoves) {
-            if (m.from().row == aiMove.from().row &&
-                m.from().col == aiMove.from().col &&
-                m.to().row   == aiMove.to().row &&
-                m.to().col   == aiMove.to().col) {
+            if (m.from() == aiMove.from() && m.to() == aiMove.to()) {
                 found = true;
                 break;
             }
         }
     }
 
-    assert(found && "[AIPlayer] chooseMove devolvió movimiento inválido");
+    assert(found);
     std::cout << "[OK] test_ai_choose_simple_move\n";
 }
 
