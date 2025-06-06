@@ -1,10 +1,11 @@
-#include "ConsoleGame.h"
+#include "AIPlayer.h"
 #include "Board.h"
-#include "RuleEngine.h"
-#include "GameResult.h"
-#include "Man.h"
-#include "King.h"
+#include "ConsoleGame.h"
 #include "FileManager.h"
+#include "GameResult.h"
+#include "King.h"
+#include "Man.h"
+#include "RuleEngine.h"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -28,10 +29,12 @@ namespace {
         std::cout << "=============================================" << '\n';
         std::cout << "    TODOPODEROSAS DAMAS - CONSOLE EDITION    " << '\n';
         std::cout << "=============================================" << '\n';
-        std::cout << "1. Empezar Juego" << '\n';
-        std::cout << "2. Tutorial" << '\n';
-        std::cout << "3. Ver partidas guardadas" << '\n';
-        std::cout << "4. Salir" << '\n';
+        std::cout << "1. Humano vs Humano" << '\n';
+        std::cout << "2. Humano vs IA" << '\n';
+        std::cout << "3. IA vs IA" << '\n';
+        std::cout << "4. Tutorial" << '\n';
+        std::cout << "5. Ver partidas guardadas" << '\n';
+        std::cout << "6. Salir" << '\n';
         std::cout << "Selecciona una opcion: ";
     }
 
@@ -71,7 +74,7 @@ void ConsoleGame::start() {
 
         int option;
         if (!readInt(option)) {
-            std::cout << "Entrada inválida. Intente con un número entre 1 y 4." << '\n';
+            std::cout << "Entrada inválida. Intente con un número del 1 al 6." << '\n';
             waitForEnter();
             continue;
         }
@@ -82,10 +85,16 @@ void ConsoleGame::start() {
                 playHumanVsHuman();
                 break;
             case 2:
+                playHumanVsAI();
+                break;
+            case 3:
+                playAIVsAI();
+                break;
+            case 4:
                 printTutorial();
                 waitForEnter();
                 break;
-            case 3: {
+            case 5: {
                 FileManager fm;
                 auto lista = fm.listSavedGames();
                 if (lista.empty()) {
@@ -115,7 +124,7 @@ void ConsoleGame::start() {
                 }
                 break;
             }
-            case 4:
+            case 6:
                 std::cout << "¡Adiós!" << '\n';
                 return;
             default:
@@ -237,5 +246,86 @@ void ConsoleGame::printBoard() const {
             }
         }
         std::cout << "\n";
+    }
+}
+
+void ConsoleGame::playHumanVsAI() {
+    board_.initialize();
+    moveHistory_.clear();
+    currentPlayer_ = Color::White;
+    AIPlayer ai(2);
+
+    while (true) {
+        clearScreen();
+        printBoard();
+
+        GameResult result;
+        if (rules_.isGameOver(board_, currentPlayer_, result)) {
+            std::cout << "\nSe acabó el juego! Resultado: " << ::to_string(result) << "\n";
+            waitForEnter();
+            return;
+        }
+
+        if (currentPlayer_ == Color::White) {
+            std::cout << "Turno del Humano (Blancas)\n";
+            std::cout << "Ingrese movimiento (ej. 2 3 3 4): ";
+            int fr, fc, tr, tc;
+            if (!readInt(fr) || !readInt(fc) || !readInt(tr) || !readInt(tc)) {
+                std::cout << "Entrada inválida." << '\n';
+                waitForEnter();
+                continue;
+            }
+            Position from{fr, fc}, to{tr, tc};
+            Move move(from, to, false);
+            auto captures = rules_.generateAllCaptures(board_, currentPlayer_);
+            for (const auto& m : captures) if (m.from() == from && m.to() == to) move = m;
+
+            if (rules_.isValidMove(board_, move)) {
+                rules_.applyMove(board_, move);
+                std::ostringstream oss;
+                oss << from.row << " " << from.col << " " << to.row << " " << to.col;
+                moveHistory_.push_back(oss.str());
+                currentPlayer_ = Color::Black;
+            } else {
+                std::cout << "Movimiento inválido." << '\n';
+                waitForEnter();
+            }
+        } else {
+            std::cout << "Turno de la IA (Negras)\n";
+            Move move = ai.chooseMove(board_, rules_);
+            rules_.applyMove(board_, move);
+            std::ostringstream oss;
+            oss << move.from().row << " " << move.from().col << " " << move.to().row << " " << move.to().col;
+            moveHistory_.push_back(oss.str());
+            currentPlayer_ = Color::White;
+        }
+    }
+}
+
+void ConsoleGame::playAIVsAI() {
+    board_.initialize();
+    moveHistory_.clear();
+    currentPlayer_ = Color::White;
+    AIPlayer whiteAI(2);
+    AIPlayer blackAI(2);
+
+    while (true) {
+        clearScreen();
+        printBoard();
+        GameResult result;
+        if (rules_.isGameOver(board_, currentPlayer_, result)) {
+            std::cout << "\nSe acabó el juego! Resultado: " << ::to_string(result) << "\n";
+            waitForEnter();
+            return;
+        }
+
+        std::cout << "Turno de la IA " << (currentPlayer_ == Color::White ? "(Blancas)" : "(Negras)") << '\n';
+        AIPlayer& currentAI = (currentPlayer_ == Color::White) ? whiteAI : blackAI;
+        Move move = currentAI.chooseMove(board_, rules_);
+        rules_.applyMove(board_, move);
+        std::ostringstream oss;
+        oss << move.from().row << " " << move.from().col << " " << move.to().row << " " << move.to().col;
+        moveHistory_.push_back(oss.str());
+        currentPlayer_ = (currentPlayer_ == Color::White) ? Color::Black : Color::White;
     }
 }

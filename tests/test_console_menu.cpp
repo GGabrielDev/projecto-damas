@@ -4,10 +4,10 @@
 #include <cassert>
 
 void test_main_menu_logic() {
-    // 1) “2” para Tutorial 
+    // 1) “4” para Tutorial 
     // 2) ENTER para regresar del tutorial 
-    // 3) “4” para Salir
-    std::stringstream input("2\n\n4\n"); 
+    // 3) “6” para Salir
+    std::stringstream input("4\n\n6\n"); 
     std::stringstream output;
 
     // Redireccionar stdin/stdout

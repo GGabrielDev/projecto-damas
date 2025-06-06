@@ -13,6 +13,8 @@ public:
     void run();
     void start();
     void playHumanVsHuman();
+    void playHumanVsAI();
+    void playAIVsAI();
     void printBoard() const;
     void switchTurn();
 
