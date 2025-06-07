@@ -8,6 +8,7 @@
 
 /// Determina si un movimiento es legal según las reglas del juego.
 /// Si hay capturas disponibles, deben tomarse (prioridad sobre movimientos simples).
+/// Complejidad: O(C + S) /	C = capturas posibles, S = movimientos simples (ambos acotados por constante)
 bool RuleEngine::isValidMove(const Board& board, const Move& move) const {
     auto captures = generateAllCaptures(board, board.getPiece(move.from())->color());
 
@@ -26,6 +27,7 @@ bool RuleEngine::isValidMove(const Board& board, const Move& move) const {
 }
 
 /// Genera todos los movimientos *simples* (sin captura) que puede realizar el jugador.
+/// O(1) / 8x8 posiciones × máx 4 mov/pieza = 256 operaciones (constante)
 std::vector<Move> RuleEngine::generateAllSimple(const Board& board, Color playerColor) const {
     std::vector<Move> moves;
 
@@ -50,6 +52,7 @@ std::vector<Move> RuleEngine::generateAllSimple(const Board& board, Color player
 }
 
 /// Genera todos los movimientos de *captura* disponibles para el jugador.
+/// O(1) / Mismo principio que generateAllSimple()
 std::vector<Move> RuleEngine::generateAllCaptures(const Board& board, Color playerColor) const {
     std::vector<Move> captures;
 
@@ -73,6 +76,7 @@ std::vector<Move> RuleEngine::generateAllCaptures(const Board& board, Color play
 }
 
 /// Aplica un movimiento sobre el tablero. Si es una captura, elimina las piezas saltadas.
+/// O(P) / P = longitud del camino (máx 12 saltos en damas)
 void RuleEngine::applyMove(Board& board, const Move& move) const {
     const auto& path = move.path();
 
@@ -109,6 +113,7 @@ void RuleEngine::applyMove(Board& board, const Move& move) const {
 
 /// Evalúa si el juego ha terminado para el jugador actual.
 /// Devuelve true si se acabó, y asigna el resultado correspondiente.
+/// O(1) / 8x8 chequeo + generación movimientos (operaciones constantes)
 bool RuleEngine::isGameOver(const Board& board, Color currentPlayer, GameResult& result) const {
     // Verificar si el jugador tiene piezas restantes
     bool hasPieces = false;

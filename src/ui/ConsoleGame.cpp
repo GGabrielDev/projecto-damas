@@ -80,6 +80,7 @@ namespace {
         return tipo + "_" + ss.str() + "_" + resultado;
     }
 
+    /// O(H) / H = historial de movimientos (longitud T)
     void saveGame(const std::string& tipo, const std::string& resultado, const std::vector<std::string>& history, const Board& board) {
         std::ostringstream movesOss;
         for (size_t i = 0; i < history.size(); ++i) {
@@ -127,6 +128,7 @@ namespace {
 
 ConsoleGame::ConsoleGame() : currentPlayer_(Color::White) {}
 
+/// O(M) / M = iteraciones hasta salir (depende del usuario)
 void ConsoleGame::start() {
     while (true) {
         clearScreen();
@@ -195,6 +197,7 @@ void ConsoleGame::start() {
     }
 }
 
+/// O(T × (1 + H)) / T = turnos, H = intentos humanos por turno
 void ConsoleGame::playHumanVsHuman() {
     board_.initialize();
     moveHistory_.clear();
@@ -290,6 +293,7 @@ void ConsoleGame::playHumanVsHuman() {
     }
 }
 
+/// O(1) / 8x8 = 64 operaciones (constante)
 void ConsoleGame::printBoard() const {
     std::cout << "     0 1 2 3 4 5 6 7" << "\n";
     std::cout << "   -----------------" << "\n";
@@ -313,6 +317,7 @@ void ConsoleGame::printBoard() const {
     }
 }
 
+/// O(T × (1 + H + A)) / A = complejidad de la IA
 void ConsoleGame::playHumanVsAI() {
     board_.initialize();
     moveHistory_.clear();
@@ -379,6 +384,7 @@ void ConsoleGame::playHumanVsAI() {
     }
 }
 
+/// O(T × (A1 + A2)) / A1/A2 = complejidad de cada IA
 void ConsoleGame::playAIVsAI() {
     board_.initialize();
     moveHistory_.clear();
