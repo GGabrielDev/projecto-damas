@@ -1,6 +1,7 @@
 #ifndef FILEMANAGER_H
 #define FILEMANAGER_H
 
+#include "Board.h"
 #include <string>
 #include <vector>
 
@@ -11,6 +12,7 @@ struct GameRecord {
     std::string datetime;   // Formato "YYYYMMDD_HHMMSS"
     std::string result;     // "BlancoGana", "NegroGana" o "Empate"
     std::string moves;      // Secuencia de movimientos, e.g. "2 3 3 4;5 4 4 3;..."
+    std::string finalBoard; // Estado final del tablero
 };
 
 class FileManager {
@@ -18,7 +20,7 @@ public:
     /// Guarda un GameRecord completo. Crea (si no existía) el directorio "saves"
     /// y genera un archivo con nombre "<gameType>_<datetime>_<result>.txt".
     /// Devuelve true si todo se escribió correctamente, false en caso contrario.
-    bool saveGameRecord(const GameRecord& record) const;
+    bool saveGameRecord(const GameRecord& record, const Board& board) const;
 
     /// Lista todos los archivos presentes en la carpeta "saves".
     /// Devuelve una lista de nombres de archivo (solo el nombre, no la ruta completa).

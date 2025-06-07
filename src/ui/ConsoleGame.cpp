@@ -18,11 +18,11 @@
 
 namespace {
     void clearScreen() {
-#ifdef _WIN32
-        system("cls");
-#else
-        system("clear");
-#endif
+        #ifdef _WIN32
+            system("cls");
+        #else
+            system("clear");
+        #endif
     }
 
     void printMainMenu() {
@@ -68,17 +68,19 @@ namespace {
         auto now = std::chrono::system_clock::now();
         std::time_t t = std::chrono::system_clock::to_time_t(now);
         std::tm tm{};
-#ifdef _WIN32
-        localtime_s(&tm, &t);
-#else
-        localtime_r(&t, &tm);
-#endif
+
+        #ifdef _WIN32
+            localtime_s(&tm, &t);
+        #else
+            localtime_r(&t, &tm);
+        #endif
+
         std::ostringstream ss;
         ss << std::put_time(&tm, "%Y%m%d_%H%M%S");
         return tipo + "_" + ss.str() + "_" + resultado;
     }
 
-    void saveGame(const std::string& tipo, const std::string& resultado, const std::vector<std::string>& history) {
+    void saveGame(const std::string& tipo, const std::string& resultado, const std::vector<std::string>& history, const Board& board) {
         std::ostringstream movesOss;
         for (size_t i = 0; i < history.size(); ++i) {
             movesOss << history[i];
@@ -91,8 +93,31 @@ namespace {
         rec.result = resultado;
         rec.moves = movesOss.str();
 
+        // Agrega el estado final del tablero
+        std::ostringstream boardStr;
+        boardStr << "     0 1 2 3 4 5 6 7\n";
+        boardStr << "   -----------------\n";
+        for (int row = 0; row < 8; ++row) {
+            boardStr << " " << row << " |";
+            for (int col = 0; col < 8; ++col) {
+                const Piece* p = board.getPiece({row, col});
+                if (!p) {
+                    boardStr << " .";
+                } else {
+                    char symbol;
+                    if (p->color() == Color::White)
+                        symbol = (p->type() == PieceType::Man) ? 'b' : 'B';
+                    else
+                        symbol = (p->type() == PieceType::Man) ? 'n' : 'N';
+                    boardStr << " " << symbol;
+                }
+            }
+            boardStr << "\n";
+        }
+        rec.finalBoard = boardStr.str();
+
         FileManager fm;
-        if (fm.saveGameRecord(rec)) {
+        if (fm.saveGameRecord(rec, board)) {
             std::cout << "Partida guardada en \"saves/" << rec.datetime << ".txt\"\n";
         } else {
             std::cout << "Error al guardar la partida.\n";
@@ -187,11 +212,11 @@ void ConsoleGame::playHumanVsHuman() {
             auto now = std::chrono::system_clock::now();
             std::time_t t = std::chrono::system_clock::to_time_t(now);
             std::tm tm{};
-#ifdef _WIN32
-            localtime_s(&tm, &t);
-#else
-            localtime_r(&t, &tm);
-#endif
+            #ifdef _WIN32
+                localtime_s(&tm, &t);
+            #else
+                localtime_r(&t, &tm);
+            #endif
             std::ostringstream ss;
             ss << std::put_time(&tm, "%Y%m%d_%H%M%S");
             std::string timestamp = ss.str();
@@ -218,7 +243,7 @@ void ConsoleGame::playHumanVsHuman() {
             rec.moves    = movesStr;
 
             FileManager fm;
-            if (fm.saveGameRecord(rec)) {
+            if (fm.saveGameRecord(rec, board_)) {
                 std::cout << "Partida guardada en \"saves/"
                           << rec.gameType << "_" << rec.datetime 
                           << "_" << rec.result << ".txt\"" << "\n";
@@ -302,7 +327,7 @@ void ConsoleGame::playHumanVsAI() {
         GameResult result;
         if (rules_.isGameOver(board_, currentPlayer_, result)) {
             std::cout << "\nSe acabó el juego! Resultado: " << ::to_string(result) << "\n";
-            saveGame("HumanVsAI", to_string(result), moveHistory_);
+            saveGame("HumanVsAI", to_string(result), moveHistory_, board_);
             waitForEnter();
             return;
         }
@@ -370,7 +395,7 @@ void ConsoleGame::playAIVsAI() {
         GameResult result;
         if (rules_.isGameOver(board_, currentPlayer_, result)) {
             std::cout << "\nSe acabó el juego! Resultado: " << ::to_string(result) << "\n";
-            saveGame("AIvsAI", to_string(result), moveHistory_);
+            saveGame("AIvsAI", to_string(result), moveHistory_, board_);
             waitForEnter();
             return;
         }
@@ -379,7 +404,7 @@ void ConsoleGame::playAIVsAI() {
         int blackCount = board_.countPieces(Color::Black);
         if (whiteCount <= 6 && blackCount <= 6 && nonProgressTurns >= 40) {
             std::cout << "\nSe declara empate por inactividad prolongada.\n";
-            saveGame("AIvsAI", "Empate", moveHistory_);
+            saveGame("AIvsAI", "Empate", moveHistory_, board_);
             waitForEnter();
             return;
         }
