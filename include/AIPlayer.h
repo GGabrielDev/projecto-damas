@@ -6,17 +6,18 @@
 #include "Move.h"
 #include "Position.h"
 
-/// AIPlayer elige un movimiento legal usando RuleEngine.
+/// Representa un jugador controlado por IA.
+/// En esta versión, la IA elige movimientos aleatoriamente entre los legales.
 class AIPlayer {
 public:
-    /// depth no se usa en esta versión básica, pero queda para futuro.
+    /// depth es un valor reservado para futuras versiones con Minimax o similares.
     explicit AIPlayer(int depth = 1);
 
-    /// Devuelve un Move válido para el color especificado
+    /// Devuelve un movimiento válido para el color especificado usando el RuleEngine.
     Move chooseMove(const Board& board, RuleEngine& engine, Color color);
 
 private:
-    int depth_;
+    int depth_;  // No se usa aún, reservado para lógica de búsqueda profunda.
 };
 
 #endif // AIPLAYER_H

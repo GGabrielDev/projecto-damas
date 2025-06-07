@@ -17,9 +17,9 @@ char Man::type() const {
 
 std::vector<Move> Man::validMoves(const Board& board, const Position& from) const {
     std::vector<Move> moves;
-    int dir = (color() == Color::White) ? -1 : 1;
+    int dir = (color() == Color::White) ? -1 : 1;  // Blancas suben, negras bajan
 
-    // Movimiento simple
+    // Movimientos simples (no captura)
     for (int dc : {-1, 1}) {
         Position to{from.row + dir, from.col + dc};
         if (to.row >= 0 && to.row < 8 && to.col >= 0 && to.col < 8 && board.isEmpty(to)) {
@@ -27,7 +27,7 @@ std::vector<Move> Man::validMoves(const Board& board, const Position& from) cons
         }
     }
 
-    // Exploración de captura (solo si hay posibles oponentes adyacentes)
+    // Verifica si hay oponentes adyacentes para iniciar exploración de captura
     bool hasEnemyNearby = false;
     for (int dr : {-1, 1}) {
         for (int dc : {-1, 1}) {
@@ -58,16 +58,17 @@ void exploreCaptures(const Board& board, const Position& from, Color color,
 
     for (int dc : {-1, 1}) {
         int dr = forward;
-        Position over{from.row + dr, from.col + dc};
-        Position to{from.row + 2 * dr, from.col + 2 * dc};
+        Position over{from.row + dr, from.col + dc};          // Posición del enemigo
+        Position to{from.row + 2 * dr, from.col + 2 * dc};    // Destino tras el salto
 
+        // Validaciones básicas de tablero
         if (to.row < 0 || to.row >= 8 || to.col < 0 || to.col >= 8 || !board.isEmpty(to))
             continue;
 
         Piece* middle = board.getPiece(over);
 
-        std::cout << "[DEBUG] En captura: from=(" << from.row << "," << from.col << ") over=(" 
-                  << over.row << "," << over.col << ") to=(" << to.row << "," << to.col << ") ";
+        std::cout << "[DEBUG] En captura: from=(" << from.row << "," << from.col
+                  << ") over=(" << over.row << "," << over.col << ") to=(" << to.row << "," << to.col << ") ";
 
         if (!middle)
             std::cout << "- over está vacío\n";
@@ -82,6 +83,7 @@ void exploreCaptures(const Board& board, const Position& from, Color color,
                 continue;
             }
 
+            // Clona el tablero, aplica captura y sigue recursivamente
             Board next = board;
             next.removePiece(over);
             next.movePiece(from, to);
@@ -94,11 +96,13 @@ void exploreCaptures(const Board& board, const Position& from, Color color,
         }
     }
 
+    // Si no se encontró captura nueva, registrar el movimiento
     if (!found && stops.size() > 1) {
         Move m(stops.front(), stops.back(), true);
         for (size_t i = 1; i < stops.size() - 1; ++i) {
             m.addIntermediate(stops[i]);
         }
+
         std::cout << "[DEBUG] Capture added with path: ";
         for (const auto& pos : m.path()) {
             std::cout << "(" << pos.row << "," << pos.col << ") ";

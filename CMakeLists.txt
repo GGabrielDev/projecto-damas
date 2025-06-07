@@ -29,12 +29,6 @@ add_executable(projecto-damas
 )
 target_link_libraries(projecto-damas core)
 
-# TestHeaders (smoke-test)
-add_executable(TestHeaders
-    src/test_headers.cpp
-)
-target_link_libraries(TestHeaders core)
-
 # Directorio de tests
 enable_testing()
 add_subdirectory(tests)

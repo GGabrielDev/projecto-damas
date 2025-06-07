@@ -15,8 +15,15 @@ class Piece {
 public:
     Piece(Color color, PieceType type);
     virtual ~Piece();
+
+    // Devuelve el color de la pieza
     Color color() const;
+
+    // Devuelve si es Peón (Man) o Rey (King)
     PieceType type() const;
+
+    // Función virtual pura que cada subclase debe implementar
+    // para calcular movimientos válidos según tipo y posición
     virtual std::vector<Move> validMoves(const Board& board, const Position& from) const = 0;
 
 protected:
